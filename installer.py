@@ -53,11 +53,10 @@ def update():
         check.dir('')#find how to use the -d arg for that
         print('Check for update')
         beshell.up()
-        #find how check for update
     else:
         print("BE::Shell isn't installed, you want to install it? [yes/no]")
         confirm = input()
         if confirm == "yes":
-            return 0 #find a string to download and compile be-shell project
+            beshell.install()
         elif confirm == "no":
             raise KeyboardInterrupt('Installation aborted by user, nothing to do.')
