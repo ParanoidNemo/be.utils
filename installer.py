@@ -18,15 +18,17 @@
 #   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #Import std library module(s)
-import os.path
-import io
-import sys
+import os, sys
 import argparse
 import logging
+import tempfile
+import shutil
+import tarfile
 
 #Import custom module(s)
 from . import check     #temp solution, have to change it when create __init__.py in spam
 from . import beshell   #temp solution, have to change it when create __init__.py in spam
+import archive
 
 #create log messages NEED TO SET IT CORRECTLY
 #logging.basicConfig(filename='be.installer.log',level=logging.DEBUG)
@@ -68,11 +70,25 @@ def install():
     else:
         beshell.install()
 
-def backup(_path):
+def backup():
     if os.path.isfile(os.path.expanduser(config_dir()['config'] + 'be.shell')):
         print('Found existing configuration.\nDo you want to back it up? [yes/no]')
         if input() == 'yes':
-            pass        #find how to create tar archive with given file(s) and folder(s)
+            bk_path = os.path.expanduser('~/.local/share/be.shell/backup/')
+#-------------------------------------------------------------------------------
+#--------------------------TUTTO DA RICONTROLLARE-------------------------------
+#-------------------------------------------------------------------------------
+            tempfile.mkdtemp(dir=bk_path)
+            for path, dirs, file in os.walk(bk_path):
+                _dir = dirs[0]
+                if _dir.startswith('tmp')
+                    tmp_dir = _dir
+                    archive.compress(tmp_dir, bk_path, name=beshell.theme()['name'])
+                    os.chdir(bk_dir)
+                    tarfile.add(cfg, arcname=beshell.theme()['name'])
+                    #aggiungere stringa per rimuovere la cartella temporanea
+                    #il ciclo for assegna correttamente tmp_dir, ma genera errore, capire perché
+            print('Everything done correctly. To restore your backup launch the script with the xxx flag')
         else:
             raise KeyboardInterrupt('Backup aborted by user, nothing to do.')
             sys.exit(1)
