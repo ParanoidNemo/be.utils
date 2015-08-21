@@ -81,13 +81,14 @@ def backup():
             tempfile.mkdtemp(dir=bk_path)
             for path, dirs, file in os.walk(bk_path):
                 _dir = dirs[0]
-                if _dir.startswith('tmp')
+                dirs.clear()
+                if _dir.startswith('tmp'):
                     tmp_dir = _dir
                     archive.compress(tmp_dir, bk_path, name=beshell.theme()['name'])
-                    os.chdir(bk_dir)
-                    tarfile.add(cfg, arcname=beshell.theme()['name'])
+                    os.chdir(bk_path)
+                    tarfile.TarFile.add(beshell.config_dir()['file'], arcname=beshell.theme()['name'])
                     #aggiungere stringa per rimuovere la cartella temporanea
-                    #il ciclo for assegna correttamente tmp_dir, ma genera errore, capire perché
+                    #il ciclo for assegna correttamente tmp_dir, ma genera errore, capire perché,
             print('Everything done correctly. To restore your backup launch the script with the xxx flag')
         else:
             raise KeyboardInterrupt('Backup aborted by user, nothing to do.')
