@@ -49,10 +49,12 @@ class Interactive(cmd.Cmd):
     intro = "Welcome to the interactive shell for be.utils.\nPlease tipe help o ? to see a list of possible commands.\n"
     prompt = '>> '
 
+    #define init sequence
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.namespace = {}
 
+    #defining escape commands and sequences
     def do_quit(self, line):
         """Close the program"""
         print("\nThanks to have used be.utils")
@@ -64,6 +66,7 @@ class Interactive(cmd.Cmd):
 
     do_q = do_quit
 
+    #defining functions
     def do_install(self, line):
         """Check if BE::Shell is installed on your system, and if not install it"""
         if check.prg('be.shell'):
@@ -76,13 +79,13 @@ class Interactive(cmd.Cmd):
         if check.prg('be.shell'):
             print('BE::Shell is correctly installed, checking update(s)..')
             print('Searching for local be.shell git repo..')
-            if -l in sys.argv:
-                check.dir(directory)        #should work, have to test it
-                print('Check for update')
-                beshell.up()
-            else:
-                print('Check for update')
-                beshell.up
+            #if -l in sys.argv:
+            #    check.dir(directory)
+            #    print('Check for update')
+            #    beshell.up()
+            #else:
+            print('Check for updates')
+            beshell.up()
         else:
             print("BE::Shell isn't installed, you want to install it? [yes/no]")
             if input() == "yes":
@@ -117,6 +120,7 @@ class Interactive(cmd.Cmd):
             else:
                 print('No existing configuration found, nothing to do')
 
+    #define precmd sequence
     def precmd(self, line):
         """Execute actions before running the command"""
         self.raw_line = line
@@ -129,6 +133,7 @@ class Interactive(cmd.Cmd):
 
         return ''
 
+    #define help function
     def help_default(self):
         print(self.default.__doc__)
 
