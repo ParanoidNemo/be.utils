@@ -96,29 +96,26 @@ class Interactive(cmd.Cmd):
     def do_backup(self, line):
         """Check if there are an existing configuration and create a backup if there are one"""
         def backup():
-            if os.path.isfile(os.path.join(Configuration.config_dir, 'be.shell')):
+            if os.path.isfile(os.path.join(beshell.Configuration.config_dir(), 'be.shell')):
                 print('Found existing configuration.\nDo you want to back it up? [yes/no]')
                 if input() == 'yes':
                     bk_path = os.path.expanduser('~/.local/share/be.shell/backup/')
-#-------------------------------------------------------------------------------
-#--------------------------TUTTO DA RICONTROLLARE-------------------------------
-#-------------------------------------------------------------------------------
-                    tempfile.mkdtemp(dir=bk_path)
-                    for path, dirs, file in os.walk(bk_path):
-                        _dir = dirs[0]
-                        dirs.clear()
-                        if _dir.startswith('tmp'):
-                            tmp_dir = _dir
-                            archive.compress(tmp_dir, bk_path, name=beshell.Theme.name)
-                            os.chdir(bk_path)
-                            tarfile.TarFile.add(beshell.Configuration.config_dir, arcname=beshell.Theme.name)
-                            os.removedirs(_dir)
-                            #il ciclo for assegna correttamente tmp_dir, ma genera errore, capire perché,
+                    tmp_dir = tempfile.mkdtemp(dir=bk_path)
+                    _tmp_dir = os.path.join(tmp_dir, beshell.Theme.name())
+                    shutil.copytree(beshell.Theme.path(), _tmp_dir)
+                    shutil.copy2(beshell.Configuration.main_file(), _tmp_dir)
+                    os.chdir(bk_path)
+                    for dirs in os.listdir(os.getcwd()):
+                        _dir = dirs
+                        archive.compress(_dir, bk_path, name=beshell.Theme.name())
+                        shutil.rmtree(tmp_dir)
                     print('Everything done correctly. To restore your backup launch the script with the xxx flag')
                 else:
                     raise KeyboardInterrupt('Backup aborted by user, nothing to do.')
             else:
                 print('No existing configuration found, nothing to do')
+
+        backup()
 
     #define precmd sequence
     def precmd(self, line):
