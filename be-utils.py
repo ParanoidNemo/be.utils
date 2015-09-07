@@ -62,7 +62,7 @@ class Interactive(cmd.Cmd):
         """With CTR-D close the program"""
         self.do_quit(line)
 
-        do_q = do_quit #verificare perché non riconosce q come scorciatoia
+    do_q = do_quit
 
     def do_install(self, line):
         """Check if BE::Shell is installed on your system, and if not install it"""
