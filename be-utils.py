@@ -25,6 +25,9 @@ import tempfile
 import shutil
 import cmd
 
+#Import downloaded module(s)
+import git
+
 #Import custom module(s)
 import check        #temp solution, have to change it when create __init__.py in spam
 import beshell      #temp solution, have to change it when create __init__.py in spam
@@ -116,6 +119,30 @@ class Interactive(cmd.Cmd):
             beshell.Theme.l_list()
         print('\n---Avaiable themes---')
         beshell.Theme.d_list()
+
+    def do_download(self, line):
+        """Download themes and features for BE::Shell from git Bedevil repo"""
+        def devil():
+            local = os.path.expanduser(beshell.project_dir)
+            os.makedirs = os.path.join(local, 'Bedevil')
+            _local = os.path.join(local, 'Bedevil')
+            _remote = 'https://github.com/Bedevil/be.shell.git'
+            g = git.cmd.Git(_local)
+
+            if not os.path.isdir(os.path.join(_local, 'be.shell')):
+                os.chdir(_local)
+                g.clone(_remote, 'be.shell')
+            else:
+                ctrl_seq = 'Already up-to-date.'
+                g2 = git.cmd.Git(os.path.join(_local, 'be.shell'))
+                git_out = g2.pull()
+
+                if git_out != ctrl_seq:
+                    print('Repository updated')
+                else:
+                    print(git_out)
+
+        devil()
 
     #define precmd sequence
 #    def precmd(self, line):
