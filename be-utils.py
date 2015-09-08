@@ -23,7 +23,6 @@ import argparse
 import logging
 import tempfile
 import shutil
-import tarfile
 import cmd
 
 #Import custom module(s)
@@ -47,7 +46,7 @@ logging.basicConfig(filename='be.utils.log', level=logging.DEBUG)
 
 class Interactive(cmd.Cmd):
     intro = "Welcome to the interactive shell for be.utils.\nPlease tipe help o ? to see a list of possible commands.\n"
-    prompt = '>> '
+    prompt = '--> '
 
     #define init sequence
     def __init__(self):
@@ -64,8 +63,6 @@ class Interactive(cmd.Cmd):
         """With CTR-D close the program"""
         self.do_quit(line)
 
-    do_q = do_quit
-
     #defining functions
     def do_install(self, line):
         """Check if BE::Shell is installed on your system, and if not install it"""
@@ -77,21 +74,14 @@ class Interactive(cmd.Cmd):
     def do_update(self, line):
         """Check if there are some updates for BE::Shell, and if there are proceed to install them"""
         if check.prg('be.shell'):
-            print('BE::Shell is correctly installed, checking update(s)..')
-            print('Searching for local be.shell git repo..')
-            #if -l in sys.argv:
-            #    check.dir(directory)
-            #    print('Check for update')
-            #    beshell.up()
-            #else:
-            print('Check for updates')
+            print('BE::Shell is correctly installed, checking update(s)..\nSearching for local be.shell git repo..\nCheck for updates')
             beshell.up()
         else:
             print("BE::Shell isn't installed, you want to install it? [yes/no]")
             if input() == "yes":
                 beshell.install()
             elif input() == "no":
-                print(KeyboardInterrupt('Installation aborted by user, nothing to do.'))
+                print('Installation aborted by user, nothing to do.')
 
     def do_backup(self, line):
         """Check if there are an existing configuration and create a backup if there are one"""
@@ -111,24 +101,41 @@ class Interactive(cmd.Cmd):
                         shutil.rmtree(tmp_dir)
                     print('Everything done correctly. To restore your backup launch the script with the xxx flag')
                 else:
-                    raise KeyboardInterrupt('Backup aborted by user, nothing to do.')
+                    print('Backup aborted by user, nothing to do.')
             else:
                 print('No existing configuration found, nothing to do')
 
         backup()
 
-    #define precmd sequence
-    def precmd(self, line):
-        """Execute actions before running the command"""
-        self.raw_line = line
-        try:
-            return(line.format_map(self.namespace))
-        except KeyError as ex:
-            print("The command %s isn't defined" %ex)
-        except ValueError:
-            print("The input cannot be a number")
+    def do_list(self, line):
+        """Print the locally installed themes, and the avaiable ones"""
+        print('\n---Installed themes---')
+        if beshell.Theme.l_list() == '':
+            print('None')
+        else:
+            beshell.Theme.l_list()
+        print('\n---Avaiable themes---')
+        beshell.Theme.d_list()
 
-        return ''
+    #define precmd sequence
+#    def precmd(self, line):
+#        """Execute actions before running the command"""
+#        self.raw_line = line
+#        try:
+#            return(line.format_map(self.namespace))
+#        except KeyError as ex:
+#            print("The command %s isn't defined" %ex)
+#        except ValueError:
+#            print("The input cannot be a number")
+#
+#        return ''
+
+    #define shotcurt sequences
+    do_i = do_install
+    do_u = do_update
+    do_b = do_backup
+    do_l = do_list
+    do_q = do_quit
 
     #define help function
     def help_default(self):
