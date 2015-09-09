@@ -144,7 +144,10 @@ class Interactive(cmd.Cmd):
     def do_download(self, line):
         """Download themes and features for BE::Shell from git Bedevil repo"""
         def devil():
-            os.makedirs(os.path.join(beshell.project_dir, 'Bedevil'))
+            try:
+                os.makedirs(os.path.join(beshell.project_dir, 'Bedevil'))
+            except FileExistsError:
+                pass
             _local = os.path.expanduser('~/project/Bedevil')
             _remote = 'https://github.com/Bedevil/be.shell.git'
             g = git.cmd.Git(_local)
@@ -162,12 +165,14 @@ class Interactive(cmd.Cmd):
             else:
                 ctrl_seq = 'Already up-to-date.'
                 g2 = git.cmd.Git(os.path.join(_local, 'be.shell'))
-                git_out = g2.pull()
+                print('Local repository already exists, searching for updates..\n..')
+                git_out = g2.pull('--recurse-submodule')
+                o = git_out.split(sep='\n')
 
-                if git_out != ctrl_seq:
-                    print('Repository updated')
+                if o[-1:][0] == ctrl_seq:
+                    print(o[-1:][0])
                 else:
-                    print(git_out)
+                    print('Repository updated')
 
         devil()
 
