@@ -112,7 +112,8 @@ class Interactive(cmd.Cmd):
             if os.path.isfile(os.path.join(beshell.Configuration.config_dir(), 'be.shell')):
                 print('Found existing configuration.\nDo you want to back it up? [yes/no]')
                 if input() == 'yes':
-                    bk_path = os.path.expanduser('~/.local/share/be.shell/backup/')
+                    bk_path = os.path.expanduser('~/.local/share/be.shell/backup')
+                    os.makedirs(bk_path)
                     tmp_dir = tempfile.mkdtemp(dir=bk_path)
                     _tmp_dir = os.path.join(tmp_dir, beshell.Theme.name())
                     shutil.copytree(beshell.Theme.path(), _tmp_dir)
@@ -143,15 +144,21 @@ class Interactive(cmd.Cmd):
     def do_download(self, line):
         """Download themes and features for BE::Shell from git Bedevil repo"""
         def devil():
-            local = os.path.expanduser(beshell.project_dir)
-            os.makedirs = os.path.join(local, 'Bedevil')
-            _local = os.path.join(local, 'Bedevil')
+            os.makedirs(os.path.join(beshell.project_dir, 'Bedevil'))
+            _local = os.path.expanduser('~/project/Bedevil')
             _remote = 'https://github.com/Bedevil/be.shell.git'
             g = git.cmd.Git(_local)
 
             if not os.path.isdir(os.path.join(_local, 'be.shell')):
-                os.chdir(_local)
-                g.clone(_remote, 'be.shell')
+                try:
+                    os.chdir(_local)
+                    print('Start cloning git repo..\n')
+                    g.clone(_remote, 'be.shell')
+                    print('Everything done without errors')
+                except FileNotFoundError as ex:
+                    logging.debug('Line: ', line)
+                    logging.debug('Message: %s\n', ex)
+                    print(ex)
             else:
                 ctrl_seq = 'Already up-to-date.'
                 g2 = git.cmd.Git(os.path.join(_local, 'be.shell'))
