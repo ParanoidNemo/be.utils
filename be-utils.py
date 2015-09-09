@@ -148,6 +148,11 @@ class Interactive(cmd.Cmd):
                 os.makedirs(os.path.join(beshell.project_dir, 'Bedevil'))
             except FileExistsError:
                 pass
+            except Exception:
+                logging.debug('Line: ', line)
+                logging.debug('Message: %s\n', ex)
+                print(ex)
+                
             _local = os.path.expanduser('~/project/Bedevil')
             _remote = 'https://github.com/Bedevil/be.shell.git'
             g = git.cmd.Git(_local)
