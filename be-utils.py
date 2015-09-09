@@ -48,13 +48,33 @@ logging.basicConfig(filename='be.utils.log', level=logging.DEBUG)
 #args = parser.parse_args()
 
 class Interactive(cmd.Cmd):
-    intro = "Welcome to the interactive shell for be.utils.\nPlease tipe help o ? to see a list of possible commands.\n"
+    intro = "Welcome to the interactive shell for be.utils.\nPlease tipe 'help' o '?' to see a list of possible commands.\n"
     prompt = '--> '
+    ruler = '-'
+    doc_header = "Documented commands - type 'help <topics>' to visualize the specific help"
+    #misc_header = ''
 
     #define init sequence
     def __init__(self):
         cmd.Cmd.__init__(self)
         self.namespace = {}
+
+    #define std behavior
+    def emptyline(self):
+        """Do nothing if the line is empty"""
+        pass
+
+    def default(self, line):
+        """Define how to do with not expected commands"""
+        try:
+            if not line.isnumeric():
+                print("The input command doesn't exists. Type 'help' for a list of defined command")
+            else:
+                print('Input must be a string')
+        except Exception as ex:
+            logging.debug('Line: ', line)
+            logging.debug('Message: %s\n', ex)
+            print(ex)
 
     #defining escape commands and sequences
     def do_quit(self, line):
@@ -144,25 +164,13 @@ class Interactive(cmd.Cmd):
 
         devil()
 
-    #define precmd sequence
-#    def precmd(self, line):
-#        """Execute actions before running the command"""
-#        self.raw_line = line
-#        try:
-#            return(line.format_map(self.namespace))
-#        except KeyError as ex:
-#            print("The command %s isn't defined" %ex)
-#        except ValueError:
-#            print("The input cannot be a number")
-#
-#        return ''
-
     #define shotcurt sequences
-    do_i = do_install
-    do_u = do_update
-    do_b = do_backup
-    do_l = do_list
-    do_q = do_quit
+#    do_i = do_install
+#    do_u = do_update
+#    do_b = do_backup
+#    do_l = do_list
+#    do_q = do_quit
+#    do_d = do_download
 
     #define help function
     def help_default(self):
