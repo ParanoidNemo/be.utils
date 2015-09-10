@@ -173,12 +173,65 @@ class Interactive(cmd.Cmd):
     def do_themeinstall(self, line):
         """Install a BE::Shell theme locally downloaded. See also 'list' for a list of already downloaded themes"""
         d = beshell.Theme.d_list()
+        l = beshell.Theme.l_list()
+        i = 0
+        a = {}
+        for item in d.values():
+            if not l.has_value(item):
+                a[i] = item
+                i += 1
+        for index, item in enumerate(a.values()):
+            print(index, '-->', item)
+        print("Choose which theme you want to install: ")
+        c = input()
+        try:
+            _c = int(c)
+            if _c in a:
+                if os.path.isfile(beshell.Configuration.main_file()):
+                    print("Another theme are already installed, you want to backup it [yes/no]? ")
+                    if input() == 'yes':
+                        beshell.backup()
+                    elif input() == 'no':
+                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
+                        if input() == 'yes':
+                            os.chdir(beshell.Configuration.config_dir())
+                            os.remove(beshell.Configuration.main_file())
+                            config_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', 'be.shell.' + a[_c])
+                            shutil.copy2(config_file, beshell.Configuration.config_dir())
+                            os.rename(config_file, 'be.shell')
+                            print("Configuration file copied..\n")
+                            theme_dir = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Themes', a[_c])
+                            shutil.copytree(theme_dir, os.path.join(beshell.Configuration.main_dir, 'Themes'))
+                            print("Theme directory copied..\nPlease reload the shell to see the applied theme")
+                        elif: input() == 'no':
+                            print('Operation aborted by user.\nNothing to do')
+                else:
+                    os.chdir(beshell.Configuration.config_dir())
+                    config_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', 'be.shell.' + a[_c])
+                    shutil.copy2(config_file, beshell.Configuration.config_dir())
+                    os.rename(config_file, 'be.shell')
+                    print("Configuration file copied..\n")
+                    theme_dir = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Themes', a[_c])
+                    shutil.copytree(theme_dir, os.path.join(beshell.Configuration.main_dir, 'Themes'))
+                    print("Theme directory copied..\nPlease reload the shell to see the applied theme")
+            else:
+                _i = []
+                for index, item in enumerate(a.keys()):
+                    _i.append(str(index))
+                print('\nYou have to choose a number between', _i[0], 'and', _i[-1])
+
+        except ValueError:
+            print('\n------\nError:\nInput must be an int')
+        except Exception as ex:
+            logging.debug('Line: ', line)
+            logging.debug('Message: %s\n', ex)
+            print(ex)
 
     def do_apply(self, line):
         """Apply a theme already installed. See also 'list' command for a list of installed themes"""
         d = beshell.Theme.l_list()
         beshell.Theme.l_list('dict')
-        print("Choose what theme you want to apply:\n")
+        print("Choose which theme you want to apply:\n")
         c = input()
         try:
             _c = int(c)
@@ -186,28 +239,31 @@ class Interactive(cmd.Cmd):
         #-----------------------------------------------------------------------
         #-----------------------TRY TESTATO FINO A QUI--------------------------
         #-----------------------------------------------------------------------
-                if os.path.isfile(os.path.join(beshell.Configuration.config_dir(), 'be.shell')):
+                if os.path.isfile(beshell.Configuration.main_file()):
                     print("Another theme are already installed, you want to backup it [yes/no]? ")
                     if input() == 'yes':
                         beshell.backup()
                     elif input() == 'no':
-                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]?')
+                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
                         if input() == 'yes':
                             os.chdir(beshell.Configuration.config_dir())
                             os.remove(beshell.Configuration.main_file())
                             config_file = beshell.Configuration.main_file + '.' + d[_c]
                             os.rename(config_file, 'be.shell')
+                            print('Everything done without errors.\nPlease reload the shell to use the applied theme')
                         elif input() == 'no':
                             print('Operation aborted by user.\nNothing to do')
                 else:
                     os.chdir(beshell.Configuration.config_dir())
                     config_file = beshell.Configuration.main_file + '.' + d[_c]
                     os.rename(config_file, 'be.shell')
+                    print('Everything done without errors.\nPlease reload the shell to use the applied theme')
             else:
                 i = []
                 for index, item in enumerate(d.keys()):
                     i.append(str(index))
                 print('\nYou have to choose a number between', i[0], 'and', i[-1])
+
         except ValueError:
             print('\n------\nError:\nInput must be an int')
         except Exception as ex:
@@ -222,8 +278,10 @@ class Interactive(cmd.Cmd):
 #    do_l = do_list
 #    do_q = do_quit
 #    do_d = do_download
+#    do_a = do_apply
+#    do_t = do_themeinstall
 
-    #define help function
+    #define help alternative function(s)
     def help_default(self):
         print(self.default.__doc__)
 
