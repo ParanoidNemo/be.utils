@@ -134,12 +134,12 @@ class Interactive(cmd.Cmd):
     def do_list(self, line):
         """Print the locally installed themes, and the avaiable ones"""
         print('\n---Installed themes---')
-        if beshell.Theme.l_list() == '':
+        if beshell.Theme.l_list('list') == '':
             print('None')
         else:
-            beshell.Theme.l_list()
+            beshell.Theme.l_list('list')
         print('\n---Avaiable themes---')
-        beshell.Theme.d_list()
+        beshell.Theme.d_list('list')
 
     def do_download(self, line):
         """Download themes and features for BE::Shell from git Bedevil repo"""
@@ -152,7 +152,7 @@ class Interactive(cmd.Cmd):
                 logging.debug('Line: ', line)
                 logging.debug('Message: %s\n', ex)
                 print(ex)
-                
+
             _local = os.path.expanduser('~/project/Bedevil')
             _remote = 'https://github.com/Bedevil/be.shell.git'
             g = git.cmd.Git(_local)
@@ -180,6 +180,38 @@ class Interactive(cmd.Cmd):
                     print('Repository updated')
 
         devil()
+
+    def do_restore(self, line):
+        """Restore a theme previusly backuped"""
+
+    def do_themeinstall(self, line):
+        """Install a BE::Shell theme locally downloaded. See also 'list' for a list of already downloaded themes"""
+        d = beshell.Theme.d_list()
+
+    def do_apply(self, line):
+        """Apply a theme already installed. See also 'list' command for a list of installed themes"""
+        d = beshell.Theme.l_list()
+        beshell.Theme.l_list('dict')
+        print("Choose what theme you want to apply:\n")
+        c = input()
+        try:
+            _c = int(c)
+            if _c in d:
+                print(d[_c])
+                pass
+                #comandi per installare il tema scelta
+            else:
+                i = []
+                for index, item in enumerate(d.keys()):
+                    i.append(str(index))
+                print('\nYou have to choose a number between', i[0], 'and', i[-1])
+                #verificare quale eccezione viene lanciata se viene digitato un numero non key
+        except ValueError:
+            print('\n------\nError:\nInput must be an int')
+        except Exception as ex:
+            logging.debug('Line: ', line)
+            logging.debug('Message: %s\n', ex)
+            print(ex)
 
     #define shotcurt sequences
 #    do_i = do_install
