@@ -108,28 +108,14 @@ class Interactive(cmd.Cmd):
 
     def do_backup(self, line):
         """Check if there are an existing configuration and create a backup if there are one"""
-        def backup():
-            if os.path.isfile(os.path.join(beshell.Configuration.config_dir(), 'be.shell')):
-                print('Found existing configuration.\nDo you want to back it up? [yes/no]')
-                if input() == 'yes':
-                    bk_path = os.path.expanduser('~/.local/share/be.shell/backup')
-                    os.makedirs(bk_path)
-                    tmp_dir = tempfile.mkdtemp(dir=bk_path)
-                    _tmp_dir = os.path.join(tmp_dir, beshell.Theme.name())
-                    shutil.copytree(beshell.Theme.path(), _tmp_dir)
-                    shutil.copy2(beshell.Configuration.main_file(), _tmp_dir)
-                    os.chdir(bk_path)
-                    for dirs in os.listdir(os.getcwd()):
-                        _dir = dirs
-                        archive.compress(_dir, bk_path, name=beshell.Theme.name())
-                        shutil.rmtree(tmp_dir)
-                    print('Everything done correctly. To restore your backup launch the script with the xxx flag')
-                else:
-                    print('Backup aborted by user, nothing to do.')
+        if os.path.isfile(os.path.join(beshell.Configuration.config_dir(), 'be.shell')):
+            print('Found existing configuration.\nDo you want to back it up? [yes/no]')
+            if input() == 'yes':
+                beshell.backup()
             else:
-                print('No existing configuration found, nothing to do')
-
-        backup()
+                print('Backup aborted by user, nothing to do.')
+        else:
+            print('No existing configuration found, nothing to do')
 
     def do_list(self, line):
         """Print the locally installed themes, and the avaiable ones"""
@@ -197,15 +183,31 @@ class Interactive(cmd.Cmd):
         try:
             _c = int(c)
             if _c in d:
-                print(d[_c])
-                pass
-                #comandi per installare il tema scelta
+        #-----------------------------------------------------------------------
+        #-----------------------TRY TESTATO FINO A QUI--------------------------
+        #-----------------------------------------------------------------------
+                if os.path.isfile(os.path.join(beshell.Configuration.config_dir(), 'be.shell')):
+                    print("Another theme are already installed, you want to backup it [yes/no]? ")
+                    if input() == 'yes':
+                        beshell.backup()
+                    elif input() == 'no':
+                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]?')
+                        if input() == 'yes':
+                            os.chdir(beshell.Configuration.config_dir())
+                            os.remove(beshell.Configuration.main_file())
+                            config_file = beshell.Configuration.main_file + '.' + d[_c]
+                            os.rename(config_file, 'be.shell')
+                        elif input() == 'no':
+                            print('Operation aborted by user.\nNothing to do')
+                else:
+                    os.chdir(beshell.Configuration.config_dir())
+                    config_file = beshell.Configuration.main_file + '.' + d[_c]
+                    os.rename(config_file, 'be.shell')
             else:
                 i = []
                 for index, item in enumerate(d.keys()):
                     i.append(str(index))
                 print('\nYou have to choose a number between', i[0], 'and', i[-1])
-                #verificare quale eccezione viene lanciata se viene digitato un numero non key
         except ValueError:
             print('\n------\nError:\nInput must be an int')
         except Exception as ex:
