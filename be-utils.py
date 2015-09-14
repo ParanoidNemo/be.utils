@@ -167,29 +167,28 @@ class Interactive(cmd.Cmd):
 
         devil()
 
-    def do_restore(self, line):
-        """Restore a theme previusly backuped"""
-        bk_path = os.path.expanduser('~/.local/share/be.shell/backup')
-        a = {}
-        i = 0
-        for index, file in enumerate(os.listdir(bk_path)):
-            print(index, '-->', file)
-            a[i] = file
-            i += 1
-        print("Choose which backup you want to restore")
-        c = input()
-        try:
-            _c = int(c)
-            if _c in a:
-                if os.path.isfile(beshell.Configuration.main_file()):
-                    print("Another theme are already installed, you want to backup it [yes/no]? ")
-                    if input() == 'yes':
-                        beshell.backup()
-                    elif input() == 'no':
-                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
-                        if input() == 'yes':
-                            archive.extract(, bk_path, a[_c])
-
+#    def do_restore(self, line):
+#        """Restore a theme previusly backuped"""
+#        bk_path = os.path.expanduser('~/.local/share/be.shell/backup')
+#        a = {}
+#        i = 0
+#        for index, file in enumerate(os.listdir(bk_path)):
+#            print(index, '-->', file)
+#            a[i] = file
+#            i += 1
+#        print("Choose which backup you want to restore")
+#        c = input()
+#        try:
+#            _c = int(c)
+#            if _c in a:
+#                if os.path.isfile(beshell.Configuration.main_file()):
+#                    print("Another theme are already installed, you want to backup it [yes/no]? ")
+#                    if input() == 'yes':
+#                        beshell.backup()
+#                    elif input() == 'no':
+#                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
+#                        if input() == 'yes':
+#                            archive.extract(, bk_path, a[_c])
 
     def do_themeinstall(self, line):
         """Install a BE::Shell theme locally downloaded. See also 'list' for a list of already downloaded themes"""
@@ -224,7 +223,7 @@ class Interactive(cmd.Cmd):
                             theme_dir = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Themes', a[_c])
                             shutil.copytree(theme_dir, os.path.join(beshell.Configuration.main_dir, 'Themes'))
                             print("Theme directory copied..\nPlease reload the shell to see the applied theme")
-                        elif: input() == 'no':
+                        elif input() == 'no':
                             print('Operation aborted by user.\nNothing to do')
                 else:
                     os.chdir(beshell.Configuration.config_dir())
@@ -308,4 +307,7 @@ class Interactive(cmd.Cmd):
 
 if __name__ == '__main__':
     bul = Interactive()
-    bul.cmdloop()
+    if len(sys.argv) > 1:
+        bul.onecmd(' '.join(sys.argv[1:]))
+    else:
+        bul.cmdloop()
