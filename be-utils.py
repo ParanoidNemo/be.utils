@@ -65,12 +65,12 @@ class Interactive(cmd.Cmd):
         pass
 
     def default(self, line):
-        """Define how to do with not expected commands"""
+        """Define what to do with not expected commands"""
         try:
             if not line.isnumeric():
                 print("The input command doesn't exists. Type 'help' for a list of defined command")
             else:
-                print('Input must be a string')
+                print('Error: Input must be a string')
         except Exception as ex:
             logging.debug('Line: ', line)
             logging.debug('Message: %s\n', ex)
@@ -194,13 +194,24 @@ class Interactive(cmd.Cmd):
         """Install a BE::Shell theme locally downloaded. See also 'list' for a list of already downloaded themes"""
         d = beshell.Theme.d_list()
         l = beshell.Theme.l_list()
+        _d = []
+        _l = []
+        _o = []
         i = 0
         a = {}
         for item in d.values():
-            if not l.has_value(item):
-                a[i] = item
-                i += 1
-        for index, item in enumerate(a.values()):
+            _d.append(item)
+        for item in l.values():
+            _l.append(item)
+        for _d[i] in _l:
+            if True:
+                pass
+            else:
+                try:
+                    _o.append(_d[i])
+                except Exception:
+                    pass
+        for index, item in enumerate(_o):
             print(index, '-->', item)
         print("Choose which theme you want to install: ")
         c = input()
