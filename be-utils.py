@@ -169,6 +169,27 @@ class Interactive(cmd.Cmd):
 
     def do_restore(self, line):
         """Restore a theme previusly backuped"""
+        bk_path = os.path.expanduser('~/.local/share/be.shell/backup')
+        a = {}
+        i = 0
+        for index, file in enumerate(os.listdir(bk_path)):
+            print(index, '-->', file)
+            a[i] = file
+            i += 1
+        print("Choose which backup you want to restore")
+        c = input()
+        try:
+            _c = int(c)
+            if _c in a:
+                if os.path.isfile(beshell.Configuration.main_file()):
+                    print("Another theme are already installed, you want to backup it [yes/no]? ")
+                    if input() == 'yes':
+                        beshell.backup()
+                    elif input() == 'no':
+                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
+                        if input() == 'yes':
+                            archive.extract(, bk_path, a[_c])
+
 
     def do_themeinstall(self, line):
         """Install a BE::Shell theme locally downloaded. See also 'list' for a list of already downloaded themes"""
@@ -196,7 +217,7 @@ class Interactive(cmd.Cmd):
                         if input() == 'yes':
                             os.chdir(beshell.Configuration.config_dir())
                             os.remove(beshell.Configuration.main_file())
-                            config_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', 'be.shell.' + a[_c])
+                            config_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', a[_c] + '.conf')
                             shutil.copy2(config_file, beshell.Configuration.config_dir())
                             os.rename(config_file, 'be.shell')
                             print("Configuration file copied..\n")
@@ -207,7 +228,7 @@ class Interactive(cmd.Cmd):
                             print('Operation aborted by user.\nNothing to do')
                 else:
                     os.chdir(beshell.Configuration.config_dir())
-                    config_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', 'be.shell.' + a[_c])
+                    config_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', a[_c] + '.conf')
                     shutil.copy2(config_file, beshell.Configuration.config_dir())
                     os.rename(config_file, 'be.shell')
                     print("Configuration file copied..\n")
