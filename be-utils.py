@@ -123,7 +123,7 @@ class Interactive(cmd.Cmd):
         if beshell.Theme.l_list('list') == '':
             print('None')
         else:
-            beshell.Theme.l_list('list')
+            pass
         print('\n---Avaiable themes---')
         beshell.Theme.d_list('list')
 
