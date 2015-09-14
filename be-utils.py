@@ -194,26 +194,20 @@ class Interactive(cmd.Cmd):
         """Install a BE::Shell theme locally downloaded. See also 'list' for a list of already downloaded themes"""
         d = beshell.Theme.d_list()
         l = beshell.Theme.l_list()
-        _d = []
+        a = []
         _l = []
-        _o = []
         i = 0
-        a = {}
-        for item in d.values():
-            _d.append(item)
         for item in l.values():
             _l.append(item)
-        for _d[i] in _l:
-            if True:
+        for item in d.values():
+            if item in _l:
                 pass
             else:
-                try:
-                    _o.append(_d[i])
-                except Exception:
-                    pass
-        for index, item in enumerate(_o):
+                a.append(item)
+        print('\n::', len(a), "new theme(s) found\n")
+        for index, item in enumerate(a):
             print(index, '-->', item)
-        print("Choose which theme you want to install: ")
+        print("\nChoose which theme you want to install: ")
         c = input()
         try:
             _c = int(c)
@@ -247,7 +241,7 @@ class Interactive(cmd.Cmd):
                     print("Theme directory copied..\nPlease reload the shell to see the applied theme")
             else:
                 _i = []
-                for index, item in enumerate(a.keys()):
+                for index, item in enumerate(a):
                     _i.append(str(index))
                 print('\nYou have to choose a number between', _i[0], 'and', _i[-1])
 
