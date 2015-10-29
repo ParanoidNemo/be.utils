@@ -174,28 +174,38 @@ class Interactive(cmd.Cmd):
 
         devil()
 
-#    def do_restore(self, line):
-#        """Restore a theme previusly backuped"""
-#        bk_path = os.path.expanduser('~/.local/share/be.shell/backup')
-#        a = {}
-#        i = 0
-#        for index, file in enumerate(os.listdir(bk_path)):
-#            print(index, '-->', file)
-#            a[i] = file
-#            i += 1
-#        print("Choose which backup you want to restore")
-#        c = input()
-#        try:
-#            _c = int(c)
-#            if _c in a:
-#                if os.path.isfile(beshell.Configuration.main_file()):
-#                    print("Another theme are already installed, you want to backup it [yes/no]? ")
-#                    if input() == 'yes':
-#                        beshell.backup()
-#                    elif input() == 'no':
-#                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
-#                        if input() == 'yes':
-#                            archive.extract(, bk_path, a[_c])
+    def do_restore(self, line):
+        """Restore a theme previusly backuped"""
+        bk_path = os.path.expanduser('~/.local/share/be.shell/backup')
+        a = {}
+        i = 0
+        for index, file in enumerate(os.listdir(bk_path)):
+            print(index, '-->', file)
+            a[i] = file
+            i += 1
+        print("Choose which backup you want to restore")
+        c = input()
+        try:
+            _c = int(c)
+            if _c in a:
+                if os.path.isfile(beshell.Configuration.main_file()):
+                    print("Another theme are already installed, you want to backup it [yes/no]? ")
+                    if input() == 'yes':
+                        beshell.Cmd.backup()
+                    elif input() == 'no':
+                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
+                        if input() == 'yes':
+                            archive.extract(, bk_path, a[_c])
+                            print("Backup restored correctly, reload the shell to apply the new configuration")
+                else:
+                    archive.extract()
+                    print("Backup restored correctly, reload the shell to apply the new configuration")
+            else:
+                _i = []
+                for index, item in enumerate(a):
+                    _i.append(str(index))
+                print('\nYou have to choose a number between', _i[0], 'and', _i[-1])
+
 
     def do_themeinstall(self, line):
         """Install a BE::Shell theme locally downloaded. See also 'list' for a list of already downloaded themes"""
