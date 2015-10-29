@@ -29,9 +29,9 @@ import cmd
 import git
 
 #Import custom module(s)
-import check        #temp solution, have to change it when create __init__.py in spam
-import beshell      #temp solution, have to change it when create __init__.py in spam
-import archive      #temp solution, have to change it when create __init__.py in spam
+from spam import check
+from spam import beshell
+from spam import archive
 
 #create log messages
 logging.basicConfig(filename='be.utils.log', level=logging.DEBUG)
@@ -48,7 +48,7 @@ logging.basicConfig(filename='be.utils.log', level=logging.DEBUG)
 #args = parser.parse_args()
 
 class Interactive(cmd.Cmd):
-    intro = "Welcome to the interactive shell for be.utils.\nPlease tipe 'help' o '?' to see a list of possible commands.\n"
+    intro = "Welcome to the interactive shell for be.utils.\nType 'help' o '?' to see a list of possible commands.\n"
     prompt = '--> '
     ruler = '-'
     doc_header = "Documented commands - type 'help <topics>' to visualize the specific help"
@@ -88,21 +88,23 @@ class Interactive(cmd.Cmd):
 
     #defining functions
     def do_install(self, line):
-        """Check if BE::Shell is installed on your system, and if not install it"""
+        """Check if BE::Shell is installed on your system, and if not, install it"""
         if check.prg('be.shell'):
             print('BE::Shell is already installed, nothing to do.')
         else:
-            beshell.install()
+            beshell.Cmd.clone()
+            beshell.Cmd.install()
 
     def do_update(self, line):
         """Check if there are some updates for BE::Shell, and if there are proceed to install them"""
         if check.prg('be.shell'):
             print('BE::Shell is correctly installed, checking update(s)..\nSearching for local be.shell git repo..\nCheck for updates')
-            beshell.up()
+            beshell.Cmd.up()
         else:
             print("BE::Shell isn't installed, you want to install it? [yes/no]")
             if input() == "yes":
-                beshell.install()
+                beshell.Cmd.clone()
+                beshell.Cmd.install()
             elif input() == "no":
                 print('Installation aborted by user, nothing to do.')
 
@@ -111,7 +113,7 @@ class Interactive(cmd.Cmd):
         if os.path.isfile(os.path.join(beshell.Configuration.config_dir(), 'be.shell')):
             print('Found existing configuration.\nDo you want to back it up? [yes/no]')
             if input() == 'yes':
-                beshell.backup()
+                beshell.Cmd.backup()
             else:
                 print('Backup aborted by user, nothing to do.')
         else:
@@ -119,13 +121,18 @@ class Interactive(cmd.Cmd):
 
     def do_list(self, line):
         """Print the locally installed themes, and the avaiable ones"""
+        l = beshell.Theme.l_list()
+        d = beshell.Theme.d_list()
         print('\n---Installed themes---')
-        if beshell.Theme.l_list('list') == '':
-            print('None')
+        if l == '':
+            print("None")
         else:
-            pass
+            for item in l.values():
+                print(item)
         print('\n---Avaiable themes---')
-        beshell.Theme.d_list('list')
+        for item in d.values():
+            if not item in l.values():
+                print(item)
 
     def do_download(self, line):
         """Download themes and features for BE::Shell from git Bedevil repo"""
@@ -147,7 +154,7 @@ class Interactive(cmd.Cmd):
                 try:
                     os.chdir(_local)
                     print('Start cloning git repo..\n')
-                    g.clone(_remote, 'be.shell')
+                    g.clone(_remote)
                     print('Everything done without errors')
                 except FileNotFoundError as ex:
                     logging.debug('Line: ', line)
@@ -195,14 +202,9 @@ class Interactive(cmd.Cmd):
         d = beshell.Theme.d_list()
         l = beshell.Theme.l_list()
         a = []
-        _l = []
         i = 0
-        for item in l.values():
-            _l.append(item)
         for item in d.values():
-            if item in _l:
-                pass
-            else:
+            if not item in l.values():
                 a.append(item)
         print('\n::', len(a), "new theme(s) found\n")
         for index, item in enumerate(a):
@@ -212,33 +214,25 @@ class Interactive(cmd.Cmd):
         try:
             _c = int(c)
             if _c in a:
+                cfg_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', a[_c] + '.conf')
+                theme_dir = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Themes', a[_c])
                 if os.path.isfile(beshell.Configuration.main_file()):
                     print("Another theme are already installed, you want to backup it [yes/no]? ")
                     if input() == 'yes':
-                        beshell.backup()
+                        beshell.Cmd.backup()
+                        os.chdir(beshell.Configuration.config_dir())
+                        beshell.Cmd.install_theme(cfg_file, theme_dir)
                     elif input() == 'no':
                         print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
                         if input() == 'yes':
                             os.chdir(beshell.Configuration.config_dir())
                             os.remove(beshell.Configuration.main_file())
-                            config_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', a[_c] + '.conf')
-                            shutil.copy2(config_file, beshell.Configuration.config_dir())
-                            os.rename(config_file, 'be.shell')
-                            print("Configuration file copied..\n")
-                            theme_dir = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Themes', a[_c])
-                            shutil.copytree(theme_dir, os.path.join(beshell.Configuration.main_dir, 'Themes'))
-                            print("Theme directory copied..\nPlease reload the shell to see the applied theme")
+                            beshell.Cmd.install_theme(cfg_file, theme_dir)
                         elif input() == 'no':
                             print('Operation aborted by user.\nNothing to do')
                 else:
                     os.chdir(beshell.Configuration.config_dir())
-                    config_file = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Config', a[_c] + '.conf')
-                    shutil.copy2(config_file, beshell.Configuration.config_dir())
-                    os.rename(config_file, 'be.shell')
-                    print("Configuration file copied..\n")
-                    theme_dir = os.path.join(beshell.project_dir, 'Bedevil', 'be.shell', 'Themes', a[_c])
-                    shutil.copytree(theme_dir, os.path.join(beshell.Configuration.main_dir, 'Themes'))
-                    print("Theme directory copied..\nPlease reload the shell to see the applied theme")
+                    beshell.Cmd.install_theme(cfg_file, theme_dir)
             else:
                 _i = []
                 for index, item in enumerate(a):
