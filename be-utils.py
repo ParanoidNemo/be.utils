@@ -32,6 +32,7 @@ import git
 from spam import check
 from spam import beshell
 from spam import archive
+from spam import methods
 
 #create log messages
 logging.basicConfig(filename='be.utils.log', level=logging.DEBUG)
@@ -258,35 +259,50 @@ class Interactive(cmd.Cmd):
 
     def do_apply(self, line):
         """Apply a theme already installed. See also 'list' command for a list of installed themes"""
-        d = beshell.Theme.l_list()
-        beshell.Theme.l_list('dict')
+        l = beshell.Theme.l_list()
         print("Choose which theme you want to apply:\n")
         c = input()
         try:
             _c = int(c)
-            if _c in d:
-        #-----------------------------------------------------------------------
-        #-----------------------TRY TESTATO FINO A QUI--------------------------
-        #-----------------------------------------------------------------------
-                if os.path.isfile(beshell.Configuration.main_file()):
-                    print("Another theme are already installed, you want to backup it [yes/no]? ")
-                    if input() == 'yes':
-                        beshell.backup()
-                    elif input() == 'no':
-                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
-                        if input() == 'yes':
-                            os.chdir(beshell.Configuration.config_dir())
-                            os.remove(beshell.Configuration.main_file())
-                            config_file = beshell.Configuration.main_file + '.' + d[_c]
-                            os.rename(config_file, 'be.shell')
-                            print('Everything done without errors.\nPlease reload the shell to use the applied theme')
-                        elif input() == 'no':
-                            print('Operation aborted by user.\nNothing to do')
+            if _c in l:
+                if be.shell.Theme.name() == _c:
+                    print("Warning: You have selected the already applied theme")
                 else:
-                    os.chdir(beshell.Configuration.config_dir())
-                    config_file = beshell.Configuration.main_file + '.' + d[_c]
-                    os.rename(config_file, 'be.shell')
-                    print('Everything done without errors.\nPlease reload the shell to use the applied theme')
+                    if os.path.isfile(beshell.Configuration.main_file()):
+                        print("Warning: found another configuration file, you want to apply this theme to the actual configuration? [yes/no]"):
+                        if input() == "yes":
+                            methods.sostitute_line(be.shell.Configuration.main_file, "Theme", "Theme=" + _c + '\n')
+                        else:
+                            pass # backup file a change name to new config file
+                    else:
+                        pass # change file name to new config file
+
+#                            with open(beshell.Configuration.main_file(), 'w') as f:
+#                                for line in f:
+#                                    if line.startswith('Theme'):
+#                                        re.sub(beshell.Theme.name(), _c)
+#-------------------------------------------------------------------------------
+#-----------------------TRY TESTATO FINO A QUI----------------------------------
+#-------------------------------------------------------------------------------
+#                if os.path.isfile(beshell.Configuration.main_file()):
+#                    print("Another theme are already installed, you want to backup it [yes/no]? ")
+#                    if input() == 'yes':
+#                        beshell.backup()
+#                    elif input() == 'no':
+#                        print('Warning:\nThe actual config will be overwrite. Are you sure [yes/no]? ')
+#                        if input() == 'yes':
+#                            os.chdir(beshell.Configuration.config_dir())
+#                            os.remove(beshell.Configuration.main_file())
+#                            config_file = beshell.Configuration.main_file + '.' + d[_c]
+#                            os.rename(config_file, 'be.shell')
+#                            print('Everything done without errors.\nPlease reload the shell to use the applied theme')
+#                        elif input() == 'no':
+#                            print('Operation aborted by user.\nNothing to do')
+#                else:
+#                    os.chdir(beshell.Configuration.config_dir())
+#                    config_file = beshell.Configuration.main_file + '.' + d[_c]
+#                    os.rename(config_file, 'be.shell')
+#                    print('Everything done without errors.\nPlease reload the shell to use the applied theme')
             else:
                 i = []
                 for index, item in enumerate(d.keys()):
